@@ -68,6 +68,10 @@ class NMEASentence(NMEASentenceBase):
         # checksum: *HH
         (?:[*](?P<checksum>[A-F0-9]{2}))?
 
+        # Additional string in Alliance's logs
+        # e.g. ',1518307200'
+        (?:,\d*)
+
         # optional trailing whitespace
         \s*[\r\n]*$
         ''', re.X | re.IGNORECASE)
