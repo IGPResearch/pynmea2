@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 import re
 import operator
 from functools import reduce
@@ -71,7 +72,7 @@ class NMEASentence(NMEASentenceBase):
         # Additional string in Alliance's logs
         # e.g. ',1518307200'
         # (optional)
-        (?:[,\d]*)
+        (?:,*(?P<alliance_tstamp>\d{10})*)
 
         # optional trailing whitespace
         \s*[\r\n]*$
@@ -112,6 +113,7 @@ class NMEASentence(NMEASentenceBase):
         checksum        = match.group('checksum')
         sentence_type   = match.group('sentence_type').upper()
         data            = data_str.split(',')
+        alliance_tstamp = match.group('alliance_tstamp')
 
         if checksum:
             cs1 = int(checksum, 16)
@@ -123,6 +125,17 @@ class NMEASentence(NMEASentenceBase):
             raise ChecksumError(
                 'strict checking requested but checksum missing', data)
 
+        if alliance_tstamp:
+            # sec since 1970-01-01
+            # TODO convert to datetime?
+            try:
+                tstamp = ((datetime(1970, 1, 1)
+                           + timedelta(seconds=int(alliance_tstamp)))
+                          .strftime('%Y%m%d%H%M%S'))
+            except ValueError:
+                tstamp = alliance_tstamp
+            data.append(tstamp)
+
         talker_match = NMEASentence.talker_re.match(sentence_type)
         if talker_match:
             talker = talker_match.group('talker')
@@ -133,6 +146,9 @@ class NMEASentence(NMEASentenceBase):
                 # TODO instantiate base type instead of fail
                 raise SentenceTypeError(
                     'Unknown sentence type %s' % sentence_type, line)
+            if alliance_tstamp:
+                cls.fields += (('Datetime', 'datetime_str', str),)
+                cls.datetime_str = tstamp
             return cls(talker, sentence, data)
 
         query_match = NMEASentence.query_re.match(sentence_type)
