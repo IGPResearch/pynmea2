@@ -70,7 +70,8 @@ class NMEASentence(NMEASentenceBase):
 
         # Additional string in Alliance's logs
         # e.g. ',1518307200'
-        (?:,\d*)
+        # (optional)
+        (?:[,\d]*)
 
         # optional trailing whitespace
         \s*[\r\n]*$
