@@ -128,13 +128,13 @@ class NMEASentence(NMEASentenceBase):
         if alliance_tstamp:
             # sec since 1970-01-01
             # TODO convert to datetime?
-            try:
-                tstamp = ((datetime(1970, 1, 1)
-                           + timedelta(seconds=int(alliance_tstamp)))
-                          .strftime('%Y%m%d%H%M%S'))
-            except ValueError:
-                tstamp = alliance_tstamp
-            data.append(tstamp)
+            # try:
+            #     tstamp = ((datetime(1970, 1, 1)
+            #                + timedelta(seconds=int(alliance_tstamp)))
+            #               .strftime('%Y%m%d%H%M%S'))
+            # except ValueError:
+            #     tstamp = alliance_tstamp
+            data.append(alliance_tstamp)
 
         talker_match = NMEASentence.talker_re.match(sentence_type)
         if talker_match:
@@ -148,7 +148,7 @@ class NMEASentence(NMEASentenceBase):
                     'Unknown sentence type %s' % sentence_type, line)
             if alliance_tstamp:
                 cls.fields += (('Datetime', 'datetime_str', str),)
-                cls.datetime_str = tstamp
+                cls.datetime_str = alliance_tstamp
             return cls(talker, sentence, data)
 
         query_match = NMEASentence.query_re.match(sentence_type)
