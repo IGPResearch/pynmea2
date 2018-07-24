@@ -17,6 +17,7 @@ class ChecksumError(ParseError):
 
 class NMEASentenceType(type):
     sentence_types = {}
+
     def __init__(cls, name, bases, dct):
         type.__init__(cls, name, bases, dct)
         base = bases[0]
@@ -147,7 +148,9 @@ class NMEASentence(NMEASentenceBase):
                 raise SentenceTypeError(
                     'Unknown sentence type %s' % sentence_type, line)
             if alliance_tstamp:
-                cls.fields += (('Datetime', 'datetime_str', str),)
+                fld = ('Datetime', 'datetime_str', str)
+                if fld not in cls.fields:
+                    cls.fields += (fld, )
                 cls.datetime_str = alliance_tstamp
             return cls(talker, sentence, data)
 
