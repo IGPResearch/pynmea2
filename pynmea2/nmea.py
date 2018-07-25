@@ -136,6 +136,15 @@ class NMEASentence(NMEASentenceBase):
             # except ValueError:
             #     tstamp = alliance_tstamp
             data.append(alliance_tstamp)
+        elif not checksum and data_str:
+            # hacky solution for Alliance messages without checksums but with
+            # date-time stamps
+            data_re = re.compile(r'.*(?P<alliance_tstamp>\d{10})\s*[\r\n]*$')
+            m = data_re.match(data_str)
+            if m:
+                alliance_tstamp = m.group('alliance_tstamp')
+                data.append(alliance_tstamp)
+
 
         talker_match = NMEASentence.talker_re.match(sentence_type)
         if talker_match:
